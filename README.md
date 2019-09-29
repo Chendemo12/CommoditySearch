@@ -1,0 +1,2 @@
+# CommodityAggregationPlatform
+汇集国内各主要电商平台的同类商品，并作出适当的排序
