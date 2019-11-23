@@ -21,7 +21,7 @@ class taobao_infos:
         options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2}) # 不加载图片,加快访问速度
         options.add_experimental_option('excludeSwitches', ['enable-automation']) # 此步骤很重要，设置为开发者模式，防止被各大网站识别出来使用了Selenium
 
-        self.browser = webdriver.Chrome(executable_path=chromedriver_path, options=options)
+        self.browser = webdriver.Chrome(options=options)
         self.wait = WebDriverWait(self.browser, 10) #超时时长为10s
 
 
@@ -132,7 +132,7 @@ class taobao_infos:
             self.browser.find_element_by_xpath("//*[@id='J_ComboRec']/div[1]")
             err2 = self.browser.find_element_by_xpath("//*[@id='J_ComboRec']/div[1]").text
             #print(err2)
-            
+
             err2 = err2[:5]
 
             if(err2 == "我们还为您"):
@@ -201,13 +201,8 @@ class taobao_infos:
 
 if __name__ == "__main__":
 
-    # 使用之前请先查看当前目录下的使用说明文件README.MD
-    # 使用之前请先查看当前目录下的使用说明文件README.MD
-    # 使用之前请先查看当前目录下的使用说明文件README.MD
-
-    chromedriver_path = "/Users/bird/Desktop/chromedriver.exe" #改成你的chromedriver的完整路径地址
-    weibo_username = "改成你的微博账号" #改成你的微博账号
-    weibo_password = "改成你的微博密码" #改成你的微博密码
+    weibo_username = "15295792585" #改成你的微博账号
+    weibo_password = "chenguang9812--@" #改成你的微博密码
 
     a = taobao_infos()
     a.login() #登录
