@@ -131,5 +131,8 @@ docs/_build/
 *.sqlite
 *.sqlite3
 
+# 数据文件
+/spyder/tianmao/data/
+/data/*
 # End of https://www.gitignore.io/api/python
 
