@@ -32,6 +32,7 @@ class CsvCreate():
     def get_GottenGoods(self):
         """
         获取已经爬取的商品名
+        return : html_file (已爬取的商品)
         """
         # 获取HTML文件名
         htmlfile_path = self.datafile_path + 'original/html/'

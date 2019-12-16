@@ -7,9 +7,10 @@
 # @Last Modified time  :  2019/12/11
 
 
-import os
+import os,re
 
 from pyquery import PyQuery as pq
+from bs4 import BeautifulSoup as bs
 
 
 class ExtractInfo():
@@ -70,6 +71,31 @@ class ExtractInfo():
         print("———— <{}>文件写入完成\n".format(file_name))
 
 
+    def get_GoodRankHtml(self,html):
+        """
+        提取商品排名页面中每一个商品的网页源码，存储为HTML文件，
+        文件名为商品ID。
+        param : html (待解析的网页)
+        """
+
+        htmlfile_base_path = os.getcwd() + r"/data/commodity/tianmao/item/make/html/"
+        doc = pq(html)
+        # 遍历该页的所有商品
+        for item in doc('#J_ItemList .product').items():
+            html = bs(item.html()).prettify()
+            # 商品链接
+            good_url = item.find('.productImg').attr('href')
+            # 正则通配符，匹配‘id=’与‘&skuId’之间的字符
+            pattern = re.compile(r'id=(\d)*\b')
+            # 商品ID
+            commodity_id = pattern.search(good_url).group(0).replace('id=','')
+            filename = htmlfile_base_path + "{}.html".format(commodity_id)
+            with open(filename,'w',encoding="utf-8") as f:
+                f.write(html)
+            print("——{}已写入！".format(filename))
+
+
+
     def get_GoodLocation(self,html,file_name):
         """
         解析网页，提取商品位置信息并存储到csv文件
@@ -82,12 +108,15 @@ class ExtractInfo():
 
 if __name__ == "__main__":
 
-    rank_example_html = os.getcwd() + r"spyder/tianmao/data/rankExample.html"
+    rank_example_html = os.getcwd() + r"/spyder/tianmao/data/rankExample.html"
 
     print(rank_example_html)
     with open(rank_example_html,'r', encoding = "utf-8") as f:
         rank_info = f.read()
 
+    with open(rank_example_html, "w", encoding = "utf-8") as f:
+        f.write(bs(rank_info).prettify())
+
     # 实例化
     extractinfo = ExtractInfo()
-    extractinfo.get_RankInfo(rank_info,"rankExample")
+    extractinfo.get_GoodRankHtml(rank_info)

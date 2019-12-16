@@ -8,6 +8,7 @@
 
 
 import os
+from bs4 import BeautifulSoup as bs
 
 def get_GottenGoods():
     """
@@ -20,13 +21,20 @@ def get_GottenGoods():
 
     for file in files:
         if ".html" in file:
-            file = file.replace('_',' ')
-            file = file.replace('.html', '')
             html_file.append(file)
     return html_file
 
 
 
 if __name__ =="__main__":
-    file = get_GottenGoods()
-    print(file)
+
+    files = get_GottenGoods()
+    htmlfile_path = os.getcwd() + r"/data/commodity/tianmao/item/original/html/"
+    # 格式化HTML代码
+    for file in files:
+        file_name = htmlfile_path + "{}".format(file)
+        with open(file_name,'r',encoding = 'utf-8') as f:
+            original_html = f.read()
+        with open(file_name, "w", encoding = "utf-8") as f:
+            f.write(bs(original_html).prettify())
+        print("——{}已修正！".format(file))

@@ -10,7 +10,7 @@ import os,re
 import sqlite3
 
 from database import DatabaseOperate
-
+from extractInfo import ExtractInfo
 
 class DataClean():
     '''
@@ -18,8 +18,12 @@ class DataClean():
     '''
     def __init__(self):
         self.path = os.getcwd() + r"/data/commodity/tianmao/item/make/"  # 数据文件路径
-        self.databaseOperate = DatabaseOperate()    # 数据库操作类
-        self.goodlist_file = os.getcwd() + r'/spyder/tianmao/goodList.csv'  # 淘宝搜索商品名
+        # 淘宝搜索商品名
+        self.goodlist_file = os.getcwd() + r'/spyder/tianmao/goodList.csv'
+        self.datafile_path = os.getcwd() + r"/data/commodity/tianmao/item/"
+        # 数据库操作类
+        self.databaseOperate = DatabaseOperate()
+        self.ExtractInfo = ExtractInfo()
 
 
     def rankClean(self,file_name):
@@ -99,7 +103,6 @@ class DataClean():
             with open(summary_filepath,'a',encoding='utf-8') as fa:
                 fa.write(row)
 
-
         print("————已写入\n\n")
 
 
@@ -115,15 +118,56 @@ class DataClean():
         return good_list
 
 
+    def get_GottenGoods(self):
+        """
+        获取已经爬取的商品名
+        return : html_file (已爬取的商品)
+        """
+        # 获取HTML文件名
+        htmlfile_path = self.datafile_path + 'original/html/'
+        # 获取当前目录下的所有html文件
+        files = os.listdir(htmlfile_path)
+        html_file = []
+        for file in files:
+            if ".html" in file:
+                html_file.append(file)
+        return html_file
+
+
+    def goodsRankHtml_Create(self):
+        goods_rank_gotten = self.get_GottenGoods()
+        for good in goods_rank_gotten:
+            try:
+                good_path = self.datafile_path + r"original/html/{}".format(good)
+                with open(good_path,'r',encoding = "utf-8") as fa:
+                    html_file = fa.read()
+                self.ExtractInfo.get_GoodRankHtml(html_file)
+            except FileNotFoundError as e:
+                print(e)
+                continue
+
 
 
 if __name__ == "__main__":
 
+    t = DataClean()
+    t.goodsRankHtml_Create()
+
+
+
+    """
     good_gotten_file = os.getcwd() + r'/spyder/tianmao/good_gotten.csv'  # 淘宝已爬取商品名
     with open(good_gotten_file,'r',encoding = 'utf-8') as f:
         good_gotten = f.read()
     good_gotten_list = good_gotten.split('\n')
 
+    dataclean = DataClean()
+    for filename in good_gotten_list:
+        try:
+            dataclean.rankSummery(filename)
+        except FileNotFoundError:
+            continue
+    """
     """
     table_list = ['紫米PD快充']
     s_list = ['保温杯']
@@ -133,10 +177,3 @@ if __name__ == "__main__":
         # 创建数据库
         t.createTable_Rank(table.replace(' ','_'))
     """
-
-    dataclean = DataClean()
-    for filename in good_gotten_list:
-        try:
-            dataclean.rankSummery(filename)
-        except FileNotFoundError:
-            continue

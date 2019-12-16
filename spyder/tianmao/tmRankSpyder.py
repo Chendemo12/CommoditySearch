@@ -15,6 +15,7 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from bs4 import BeautifulSoup as bs
 
 # 数据提取类
 from extractInfo import ExtractInfo
@@ -227,7 +228,7 @@ class TmRankSpyder:
         filename = '{}.html'.format(filename.replace(' ','_'))
         filepath = os.getcwd() + r'data/commodity/tianmao/item/original/html/' + filename
         with open(filepath,'w', encoding='utf-8') as f:
-            f.write(html)
+            f.write(bs(html).prettify())
 
     def openTianmao(self,url):
         """
