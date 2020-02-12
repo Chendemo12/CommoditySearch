@@ -1,24 +1,24 @@
 # -*- encoding: utf-8 -*-
-# @Author  :  LiChenguang
+# @Author:  LiChenguang
 # @Data  :  2019/11/19
-# @Email  :  chendemo12@gmail.com
-# @sys  :  elementary OS
-# @WebSite  :  www.searcher.ltd
-# @Last Modified time  :  2019/12/11
+# @Email :  chendemo12@gmail.com
+# @sys   :  Ubuntu 18.04
+# @WebSite: www.searcher.ltd
+# @Last Modified time:  2020/02/05
 
-import random,os
+
+import os
+import random
 from time import sleep
 
+from bs4 import BeautifulSoup as bs
 from pyquery import PyQuery as pq
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from bs4 import BeautifulSoup as bs
 
-# 数据提取类
-from extractInfo import ExtractInfo
 
 class RandomDelay():
     '''
@@ -39,9 +39,9 @@ class RandomDelay():
         sleep(int(self.num/2))
 
 
-class TmRankSpyder:
+class TmRankSpyder():
     '''
-    爬取天猫指定类别商品排名
+    按指定名称抓取天猫商品，取任意一种商品经过综合排序后的第一页(共60个)，并存储网页源码
         get_Tianmao_Comoditydata()：搜索天猫指定类别商品.
     '''
 
@@ -52,37 +52,41 @@ class TmRankSpyder:
         self.path = os.getcwd() + r"/spyder/tianmao/"   # 工作路径
 
         options = webdriver.ChromeOptions()
+
         # 不加载图片,加快访问速度
         #options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
+
         # 设置为开发者模式
         options.add_experimental_option('excludeSwitches', ['enable-automation'])
         self.browser = webdriver.Chrome(options=options)
         self.wait = WebDriverWait(self.browser, 10) # 超时时长为10s
         # 实例化休眠类
         self.RandomDelay = RandomDelay()
-        # 实例化数据提取类
-        self.ExtractInfo = ExtractInfo()
 
 
     def login(self):
-        """登录淘宝"""
+        """手动扫码登录淘宝"""
 
         self.browser.get(self.url)
         # 等待网页加载完成
         self.browser.implicitly_wait(30)
 
         print("请在20秒内手动登录淘宝！")
-        sleep(15)
+        sleep(1)
 
         # 确定是否登录成功
         taobao_name = self.wait.until(EC.presence_of_element_located(
             (By.CSS_SELECTOR, '.site-nav-bd > ul.site-nav-bd-l > li#J_SiteNavLogin > div.site-nav-menu-hd > div.site-nav-user > a.site-nav-login-info-nick ')))
 
-        # 输出淘宝昵称
-        print(taobao_name.text + '{}'.format('—————已成功登录！'))
+        if type(taobao_name.text) != str:
+            return
+        else:
+            # 输出淘宝昵称
+            print(taobao_name.text + '{}'.format('—————已成功登录！'))
+            pass
 
-#######################以下内容暂时无效#######################
 
+    #######################以下内容暂时无效#######################
     def get_Toalpage(self):
         """
         获取天猫商品总共的页数
@@ -217,13 +221,15 @@ class TmRankSpyder:
             except Exception as e:
                 print ('get button failed: ', e)
 
-#######################以上内容暂时无效#######################
+    #######################以上内容暂时无效#######################
 
-    def save_page(self,html,filename):
+
+    def savePage(self,html,filename):
         """
         存储页面源代码
         param:  html (网页源码)
                 filename (网页文件名，为搜索商品名)
+        *return commodity.html
         """
         filename = '{}.html'.format(filename.replace(' ','_'))
         filepath = os.getcwd() + r'data/commodity/tianmao/item/original/html/' + filename
@@ -234,10 +240,9 @@ class TmRankSpyder:
         """
         打开天猫商品页面，用于精简代码
         param : url:商品链接
-        return :self.browser.page_source (网页源码)
+        return :page_source (网页源码)
         """
 
-        # 打开浏览器
         self.browser.get("{}".format(url))
         err1 = self.browser.find_element_by_xpath("//*[@id='content']/div/div[2]").text
         err1 = err1[:5]
@@ -247,15 +252,12 @@ class TmRankSpyder:
         try:
             self.browser.find_element_by_xpath("//*[@id='J_ComboRec']/div[1]")
             err2 = self.browser.find_element_by_xpath("//*[@id='J_ComboRec']/div[1]").text
-            #print(err2)
 
             err2 = err2[:5]
-
             if(err2 == "我们还为您"):
                 print("您要查询的商品书目太少了")
                 return
         except:
-            print(url)
             print("可以爬取这些信息\n")
 
         # 等待该页面全部商品数据加载完毕
@@ -268,40 +270,37 @@ class TmRankSpyder:
         return self.browser.page_source
 
 
-    def get_FirstPageRank(self,search_list):
+    def get_FirstPageRank(self,searchlist):
         """
         获取第一页商品排名
         param: search_list(搜索商品名列表)
         """
 
-        # 先查询第一个商品排名页
-        search_name = search_list[0]
+        # 先查询第一种商品排名页
+        search_name = searchlist[0]
         url = "https://list.tmall.com/search_product.htm?q={}".format(search_name)
         webpage = self.openTianmao(url)
         # 存储网页源码
-        self.save_page(webpage,search_name)
+        self.savePage(webpage,search_name)
         # 休眠
         self.RandomDelay.delay_2()
-        # 提取信息并存储到csv文件
-        self.ExtractInfo.get_RankInfo(webpage,search_name)
 
-        for name in search_list[1:]:
+        print("———— {search_name}:已爬取\n")        # 程序运行指示
+
+        for name in searchlist[1:]:
             # 搜索下一个商品，新窗口打开连接
             newwindow = 'window.open("https://list.tmall.com/search_product.htm?q={}");'.format(name)
             self.browser.execute_script(newwindow)
+
             # 移动句柄，对新打开页面进行操作
             self.browser.switch_to_window(self.browser.window_handles[1])
-
-            #######################################################
-            ####################### 具体操作 #######################
-
             page_url = "https://list.tmall.com/search_product.htm?q={}".format(name)
             # 在当前页面下打开链接并获取源码
             web_page = self.openTianmao(page_url)
             # 存储网页源码
-            self.save_page(web_page,name)
-            # 提取信息并存储到csv文件
-            self.ExtractInfo.get_RankInfo(web_page,name.replace(' ','_'))
+            self.savePage(web_page,name)
+
+            print("———— {search_name}:已爬取\n")        # 程序运行指示
 
             # 关闭该新打开的页面
             self.browser.close()
@@ -310,8 +309,6 @@ class TmRankSpyder:
 
             # 休眠
             self.RandomDelay.delay_3()
-
-            #######################################################
 
         print("———— 程序运行结束！")
 
@@ -325,4 +322,3 @@ if __name__ == "__main__":
     a = TmRankSpyder()
     a.login() #登录
     a.get_FirstPageRank(search_list)
-

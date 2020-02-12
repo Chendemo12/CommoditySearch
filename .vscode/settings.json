@@ -1,6 +1,6 @@
 {
     "editor.fontLigatures": true,
-     "editor.fontFamily": "monospace",//编辑器字体设置
+    "editor.fontFamily": "monospace",//编辑器字体设置
     "editor.lineHeight": 0,
     "editor.autoIndent": true,
     "editor.codeLens": true,

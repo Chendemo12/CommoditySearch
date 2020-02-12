@@ -1,10 +1,11 @@
 # -*- encoding: utf-8 -*-
-# @Author  :  LiChenguang
+# @Author:  LiChenguang
 # @Data  :  2019/12/06
-# @Email  :  chendemo12@gmail.com
-# @sys  :  elementary OS
-# @WebSite  :  www.searcher.ltd
-# @Last Modified time  :  2019/12/06
+# @Email :  chendemo12@gmail.com
+# @sys   :  Ubuntu 18.04
+# @WebSite: www.searcher.ltd
+# @Last Modified time:  2020/02/06
+
 
 import os
 import random
@@ -17,15 +18,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-# 数据提取类
-from extractInfo import ExtractInfo
 # 随机延迟类，天猫商品爬虫
-from tmRankSpyder import RandomDelay,TmRankSpyder
+from tmRankSpyder import RandomDelay, TmRankSpyder
 
 
-class TmGoodSpyder:
+class TmGoodSpyder():
     '''
-    爬取天猫商品信息
+    爬取指定天猫商品信息
     '''
 
     def __init__(self):
@@ -66,7 +65,12 @@ class TmGoodSpyder:
         print(taobao_name.text + '{}'.format('—————已成功登录！'))
 
 
-    def save_page(self,html,filename):
+    def get_GoodsUrl(self):
+        return urlList
+        pass
+
+
+    def savePage(self,html,filename):
         """
         存储页面源代码
         param:  html (网页源码)
@@ -88,50 +92,7 @@ class TmGoodSpyder:
 
 
 
-    def get_GoodInfo(self,html,file_name):
-        """
-        解析网页，提取商品信息，并存储到文件，代码引用于 “extractInfo.ExtractInfo.get_GoodLocation()”
-        """
-        self.ExtractInfo.get_GoodLocation()
 
-
-    def get_FirstPageRank(self,search_list):
-        """
-        获取第一页商品源代码
-        param: search_list(搜索商品名列表)
-        """
-
-        # 先查询第一个商品页
-        search_name = search_list[0]
-        url = "https://list.tmall.com/search_product.htm?q={}".format(search_name)
-        webpage = self.openTianmao(url)
-        # 休眠
-        self.RandomDelay.delay_2()
-
-        self.get_GoodInfo(webpage,search_name)
-
-        for name in search_list[1:]:
-            # 搜索下一个商品，新窗口打开连接
-            newwindow = 'window.open("https://list.tmall.com/search_product.htm?q={}");'.format(name)
-            self.browser.execute_script(newwindow)
-            # 移动句柄，对新打开页面进行操作
-            self.browser.switch_to_window(self.browser.window_handles[1])
-
-            ###### 具体操作 ######
-            page_url = "https://list.tmall.com/search_product.htm?q={}".format(name)
-            # 覆盖当前打开的页面，相当于刷新
-            web_page = self.openTianmao(page_url)
-
-            # 休眠
-            self.RandomDelay.delay_3()
-            self.get_GoodInfo(web_page,name)
-
-            # 关闭该新打开的页面
-            self.browser.close()
-            # 不关闭，要移动到上一个页面，我们要移动句柄
-            self.browser.switch_to_window(self.browser.window_handles[0])
-
-        print("— — 程序运行结束！")
 
 
 
